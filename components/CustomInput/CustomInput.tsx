@@ -8,7 +8,6 @@ const CustomInput = ({
   rules = {},
   placeholder,
   secureTextEntry,
-  onChangeText,
 }: any) => {
   return (
     <>
@@ -17,7 +16,10 @@ const CustomInput = ({
           control={control}
           name={name}
           rules={rules}
-          render={({ field: { value, onBlur }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <>
               <View
                 style={[
@@ -27,7 +29,7 @@ const CustomInput = ({
               >
                 <TextInput
                   value={value}
-                  onChangeText={onChangeText}
+                  onChangeText={onChange}
                   onBlur={onBlur}
                   placeholder={placeholder}
                   style={styles.input}

@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -22,8 +19,6 @@ const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
 const SignIn = () => {
   const { height } = useWindowDimensions();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -32,7 +27,7 @@ const SignIn = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({ mode: "onTouched" });
 
   console.log(errors);
 
@@ -50,9 +45,9 @@ const SignIn = () => {
     navigation.navigate("Register");
   };
 
-  const handleLogin = () => {
+  const handleLogin = (data: any) => {
     auth
-      .signInWithEmailAndPassword(email, password)
+      .signInWithEmailAndPassword(data.email.trim(), data.password)
       .then((userCredentials: { user: any }) => {
         const user = userCredentials.user;
         console.log("Logged in with", user.email);
@@ -72,10 +67,8 @@ const SignIn = () => {
           <CustomInput
             name="email"
             placeholder="Email"
-            value={email}
             control={control}
             secureTextEntry={false}
-            onChangeText={(text: string) => setEmail(text)}
             rules={{
               pattern: { value: EMAIL_REGEX, message: "Email is invalid" },
             }}
@@ -83,8 +76,6 @@ const SignIn = () => {
           <CustomInput
             name="password"
             placeholder="Password"
-            value={password}
-            onChangeText={(text: string) => setPassword(text)}
             control={control}
             secureTextEntry={true}
             rules={{
@@ -98,34 +89,6 @@ const SignIn = () => {
           <CustomButton text="Sign In" onPress={handleSubmit(handleLogin)} />
           <CustomButton type="SECONDARY" text="Register" onPress={onRegister} />
         </View>
-
-        {/* <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Password"
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            style={styles.input}
-            secureTextEntry
-          />
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleLogin} style={styles.button}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onRegister}
-            style={[styles.button, styles.buttonOutline]}
-          >
-            <Text style={styles.buttonOutlineText}>Register</Text>
-          </TouchableOpacity>
-        </View> */}
-
         <SocialSignInButtons />
       </View>
     </ScrollView>
@@ -146,43 +109,5 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: "100%",
-  },
-  input: {
-    backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginTop: 5,
-  },
-  buttonContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#3b71f3",
-    borderColor: "#3b71f3",
-    width: "100%",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonOutline: {
-    backgroundColor: "white",
-    marginTop: 5,
-    borderColor: "#3b71f3",
-    borderWidth: 2,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  buttonOutlineText: {
-    color: "#3b71f3",
-    fontWeight: "700",
-    fontSize: 16,
   },
 });
