@@ -32,13 +32,13 @@ const SignIn = () => {
   console.log(errors);
 
   useEffect(() => {
-    const c = auth.onAuthStateChanged((user) => {
+    const subscriber = auth.onAuthStateChanged((user) => {
       if (user) {
         navigation.replace("Home");
       }
     });
 
-    return c;
+    return subscriber;
   }, []);
 
   const onRegister = () => {
@@ -69,7 +69,9 @@ const SignIn = () => {
             placeholder="Email"
             control={control}
             secureTextEntry={false}
+            autoCapitalize="none"
             rules={{
+              required: "Email is required",
               pattern: { value: EMAIL_REGEX, message: "Email is invalid" },
             }}
           />

@@ -1,5 +1,5 @@
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RouteProp } from "@react-navigation/native";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -9,7 +9,6 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   NewPassword: undefined;
   ConfirmEmail: undefined;
-  NotFound: undefined;
 };
 
 export type MessageNavProps<T extends keyof RootStackParamList> = {

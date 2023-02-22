@@ -1,18 +1,16 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { auth } from "../../firebase";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/types";
-import CustomInput from "../../components/CustomInput/CustomInput";
+import { StyleSheet, View, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { auth, db } from "../../firebase";
+import CustomButton from "../../components/CustomButton/CustomButton";
+import CustomInput from "../../components/CustomInput";
 import { useForm } from "react-hook-form";
-import CustomButton from "../../components/CustomButton";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
 const Register = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [datum, setDatum] = useState({});
+
+  console.log(datum);
 
   const {
     control,
@@ -22,47 +20,70 @@ const Register = () => {
 
   console.log(errors);
 
-  useEffect(() => {
-    const c = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigation.replace("Home");
-      }
-    });
+  const registerUser = async (data: any) => {
+    const datum = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+    };
 
-    return c;
-  }, []);
-
-  const handleSignUp = (data: any) => {
-    if (data.password !== data.repeatPassword) {
-      alert("Passwords dont match");
-      return;
-    }
-
+    console.log(data);
     auth
-      .createUserWithEmailAndPassword(data.email.trim(), data.password)
-      .then((userCredentials: { user: any }) => {
-        const user = userCredentials.user;
-        console.log("Registered with", user.email);
+      .createUserWithEmailAndPassword(datum.email, data.password)
+      .then(() => {
+        auth.currentUser
+          ?.sendEmailVerification({
+            handleCodeInApp: true,
+            url: "https://react-native-login-35cee.firebaseapp.com",
+          })
+
+          .then(() => {
+            db.collection("users").doc(auth.currentUser?.uid).set({
+              datum,
+            });
+            setDatum(datum);
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
       })
-      .catch((error: { message: string }) => alert(error.message));
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={styles.root}>
-        <View style={styles.inputContainer}>
+      <View style={styles.containerA}>
+        <View style={styles.container}>
           <CustomInput
-            name="username"
-            placeholder="Username"
+            name="firstName"
+            placeholder="First Name"
             control={control}
             secureTextEntry={false}
+            autoCapitalize="none"
+            rules={{
+              required: "First Name is required",
+            }}
+          />
+          <CustomInput
+            name="lastName"
+            placeholder="Last Name"
+            control={control}
+            secureTextEntry={false}
+            autoCapitalize="none"
+            rules={{
+              required: "Last Name is required",
+            }}
           />
           <CustomInput
             name="email"
             placeholder="Email"
             control={control}
             secureTextEntry={false}
+            autoCapitalize="none"
             rules={{
+              required: "Email is required",
               pattern: { value: EMAIL_REGEX, message: "Email is invalid" },
             }}
           />
@@ -71,7 +92,6 @@ const Register = () => {
             placeholder="Password"
             control={control}
             secureTextEntry={true}
-            // value={value}
             rules={{
               required: "Password is required",
               minLength: {
@@ -80,24 +100,11 @@ const Register = () => {
               },
             }}
           />
-
-          <CustomInput
-            name="repeatPassword"
-            placeholder="Repeat Password"
-            control={control}
-            secureTextEntry={true}
-            // value={value}
-            rules={{
-              required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Minimum 6 characters",
-              },
-            }}
-          />
-
-          <CustomButton text="Register" onPress={handleSubmit(handleSignUp)} />
         </View>
+        <CustomButton
+          text="Register"
+          onPress={handleSubmit((data) => registerUser(data))}
+        />
       </View>
     </ScrollView>
   );
@@ -106,11 +113,12 @@ const Register = () => {
 export default Register;
 
 const styles = StyleSheet.create({
-  root: {
+  containerA: {
     alignItems: "center",
     padding: 20,
   },
-  inputContainer: {
+  container: {
     width: "100%",
+    marginVertical: 5,
   },
 });
